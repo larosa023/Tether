@@ -58,6 +58,24 @@ internal static class SelfTest
             log.Add("settings pages ok");
 
             log.Add($"semver: {SemVer.TryParse("v1.2.3-beta.1", out var v) && v.CompareTo(new SemVer(1, 2, 3, null)) < 0}");
+
+            // Updater: real call to GitHub. A CI build (0.0.0-ci.N) sees the latest release as an update,
+            // so this also proves download + SHA-256 verification end to end. Network trouble isn't fatal.
+            try
+            {
+                var info = await shell.Updates.CheckAsync(manual: true);
+                if (info == null) log.Add("updater: up to date / no releases");
+                else
+                {
+                    log.Add($"updater: found {info.Version} (sha asset: {info.ShaUrl != null})");
+                    var path = await shell.Updates.DownloadAsync(info, null);
+                    log.Add($"updater: downloaded and verified {new FileInfo(path).Length / 1024 / 1024} MB");
+                }
+            }
+            catch (Exception ex) when (ex is System.Net.Http.HttpRequestException or TaskCanceledException)
+            {
+                log.Add($"updater: network unavailable ({ex.Message})");
+            }
             win.Close();
             flyout.Close();
             shell.Dispose();
