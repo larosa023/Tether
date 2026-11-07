@@ -1,0 +1,357 @@
+<Window x:Class="Tether.UI.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tether Settings" Width="820" Height="600" MinWidth="680" MinHeight="460"
+        WindowStartupLocation="CenterScreen" Icon="/Assets/Tether.png"
+        Background="{DynamicResource WindowBg}" FontFamily="{StaticResource UiFont}"
+        Foreground="{DynamicResource TextPrimary}" UseLayoutRounding="True">
+
+    <Window.Resources>
+        <Style x:Key="PageTitle" TargetType="TextBlock" BasedOn="{StaticResource Title}">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+        <Style x:Key="Row" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="Padding" Value="14,12" />
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="TextTrimming" Value="None" />
+            <Setter Property="Margin" Value="0,3,0,0" />
+        </Style>
+        <Style x:Key="Label" TargetType="TextBlock" BasedOn="{StaticResource Body}">
+            <Setter Property="TextTrimming" Value="None" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="210" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Navigation -->
+        <DockPanel Margin="12,16,8,12">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8,0,0,18">
+                <Image Source="/Assets/Tether.png" Width="26" Height="26" RenderOptions.BitmapScalingMode="HighQuality" />
+                <TextBlock Text="Tether" Style="{StaticResource Title}" FontSize="17" Margin="10,0,0,0" VerticalAlignment="Center" />
+            </StackPanel>
+            <ListBox x:Name="Nav" Style="{StaticResource PlainList}" SelectionChanged="Nav_SelectionChanged">
+                <ListBoxItem Tag="General"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE713;" Style="{StaticResource Icon}" FontSize="14" /><TextBlock Text="General" Margin="12,0,0,0" /></StackPanel></ListBoxItem>
+                <ListBoxItem Tag="Devices"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE702;" Style="{StaticResource Icon}" FontSize="14" /><TextBlock Text="Devices &amp; profiles" Margin="12,0,0,0" /></StackPanel></ListBoxItem>
+                <ListBoxItem Tag="Integrations"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE71B;" Style="{StaticResource Icon}" FontSize="14" /><TextBlock Text="Integrations" Margin="12,0,0,0" /></StackPanel></ListBoxItem>
+                <ListBoxItem Tag="Updates"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE895;" Style="{StaticResource Icon}" FontSize="14" /><TextBlock Text="Updates" Margin="12,0,0,0" /></StackPanel></ListBoxItem>
+                <ListBoxItem Tag="About"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE946;" Style="{StaticResource Icon}" FontSize="14" /><TextBlock Text="About" Margin="12,0,0,0" /></StackPanel></ListBoxItem>
+            </ListBox>
+        </DockPanel>
+
+        <Grid Grid.Column="1" Margin="8,16,16,16">
+
+            <!-- ============================== General -->
+            <ScrollViewer x:Name="PageGeneral" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock Text="General" Style="{StaticResource PageTitle}" />
+
+                    <TextBlock Text="Appearance" Style="{StaticResource SectionHeader}" Margin="2,0,0,6" />
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel>
+                            <TextBlock Text="Theme" Style="{StaticResource Label}" Margin="0,0,0,8" />
+                            <WrapPanel>
+                                <RadioButton x:Name="ThemeSystem" GroupName="theme" Style="{StaticResource Chip}" Content="Use Windows setting" Checked="Theme_Checked" />
+                                <RadioButton x:Name="ThemeLight" GroupName="theme" Style="{StaticResource Chip}" Content="Light" Checked="Theme_Checked" />
+                                <RadioButton x:Name="ThemeDark" GroupName="theme" Style="{StaticResource Chip}" Content="Dark" Checked="Theme_Checked" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel>
+                            <TextBlock Text="Accent color" Style="{StaticResource Label}" Margin="0,0,0,8" />
+                            <WrapPanel x:Name="AccentPanel" />
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Tray" Style="{StaticResource SectionHeader}" Margin="2,10,0,6" />
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel>
+                            <TextBlock Text="Tray icon shows" Style="{StaticResource Label}" Margin="0,0,0,8" />
+                            <WrapPanel>
+                                <RadioButton x:Name="TrayModeIcon" GroupName="tray" Style="{StaticResource Chip}" Content="Connection status" Checked="Tray_Checked" />
+                                <RadioButton x:Name="TrayModeBattery" GroupName="tray" Style="{StaticResource Chip}" Content="Battery level" Checked="Tray_Checked" />
+                            </WrapPanel>
+                            <Grid x:Name="TrayBatteryRow" Margin="0,6,0,0">
+                                <TextBlock Text="Battery of" Style="{StaticResource Caption}" VerticalAlignment="Center" />
+                                <ComboBox x:Name="TrayDeviceCombo" Margin="80,0,0,0" MaxWidth="320" HorizontalAlignment="Left" Width="320"
+                                          DisplayMemberPath="Label" SelectionChanged="TrayDevice_Changed" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Behavior" Style="{StaticResource SectionHeader}" Margin="2,10,0,6" />
+                    <Border Style="{StaticResource Row}">
+                        <CheckBox x:Name="StartWithWindows" Style="{StaticResource ToggleSwitch}" Click="Toggle_Click">
+                            <StackPanel>
+                                <TextBlock Text="Start with Windows" Style="{StaticResource Label}" />
+                                <TextBlock Text="Launches quietly into the tray when you sign in." Style="{StaticResource Hint}" />
+                            </StackPanel>
+                        </CheckBox>
+                    </Border>
+                    <Border Style="{StaticResource Row}">
+                        <CheckBox x:Name="ConnectionNotifications" Style="{StaticResource ToggleSwitch}" Click="Toggle_Click">
+                            <TextBlock Text="Notify when a device connects or disconnects" Style="{StaticResource Label}" />
+                        </CheckBox>
+                    </Border>
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel>
+                            <CheckBox x:Name="LowBatteryNotifications" Style="{StaticResource ToggleSwitch}" Click="Toggle_Click">
+                                <TextBlock Text="Low battery alerts" Style="{StaticResource Label}" />
+                            </CheckBox>
+                            <Grid Margin="0,10,0,0">
+                                <TextBlock x:Name="ThresholdText" Style="{StaticResource Caption}" VerticalAlignment="Center" />
+                                <Slider x:Name="ThresholdSlider" Minimum="5" Maximum="50" TickFrequency="5" IsSnapToTickEnabled="True"
+                                        Margin="110,0,0,0" ValueChanged="Threshold_Changed" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Row}">
+                        <CheckBox x:Name="ShowAudioSection" Style="{StaticResource ToggleSwitch}" Click="Toggle_Click">
+                            <TextBlock Text="Show the audio output switcher in the flyout" Style="{StaticResource Label}" />
+                        </CheckBox>
+                    </Border>
+                    <Border x:Name="ElevationRow" Style="{StaticResource Row}">
+                        <Grid>
+                            <StackPanel Margin="0,0,150,0">
+                                <TextBlock Text="Administrator mode" Style="{StaticResource Label}" />
+                                <TextBlock Text="Some mice and controllers can only be disconnected by an administrator. Headphones and earbuds never need this."
+                                           Style="{StaticResource Hint}" />
+                            </StackPanel>
+                            <Button Style="{StaticResource SecondaryButton}" Content="Restart as admin" HorizontalAlignment="Right"
+                                    VerticalAlignment="Center" Click="Elevate_Click" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============================== Devices & profiles -->
+            <Grid x:Name="PageDevices" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Devices &amp; profiles" Style="{StaticResource PageTitle}" />
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="210" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource Card}" Padding="4">
+                        <ListBox x:Name="DeviceList" Style="{StaticResource PlainList}" SelectionChanged="DeviceList_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Glyph}" Style="{StaticResource Icon}" FontSize="14" Foreground="{DynamicResource TextSecondary}" />
+                                        <StackPanel Margin="10,0,0,0">
+                                            <TextBlock Text="{Binding DisplayName}" Style="{StaticResource Body}" MaxWidth="140" />
+                                            <TextBlock Text="{Binding StatusText}" Style="{StaticResource Caption}" FontSize="11" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+
+                    <TextBlock x:Name="NoDeviceSelected" Grid.Column="1" Text="Pick a device to set up its profile." Style="{StaticResource Caption}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                    <ScrollViewer x:Name="ProfilePanel" Grid.Column="1" Margin="12,0,0,0" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                        <StackPanel Margin="0,0,10,0">
+                            <Border Style="{StaticResource Row}">
+                                <StackPanel>
+                                    <TextBlock x:Name="ProfileDeviceName" Style="{StaticResource Title}" />
+                                    <TextBlock x:Name="ProfileDeviceAddress" Style="{StaticResource Caption}" Margin="0,2,0,10" />
+                                    <TextBlock Text="Display name" Style="{StaticResource Caption}" Margin="0,0,0,4" />
+                                    <TextBox x:Name="CustomNameBox" TextChanged="Profile_Changed" />
+                                    <CheckBox x:Name="HiddenToggle" Style="{StaticResource ToggleSwitch}" Margin="0,12,0,0" Click="Profile_Changed">
+                                        <TextBlock Text="Hide from the flyout and tray menu" Style="{StaticResource Label}" />
+                                    </CheckBox>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="When this device connects" Style="{StaticResource SectionHeader}" Margin="2,10,0,6" />
+                            <Border Style="{StaticResource Row}">
+                                <CheckBox x:Name="ProfileEnabled" Style="{StaticResource ToggleSwitch}" Click="Profile_Changed">
+                                    <TextBlock Text="Run this profile automatically" Style="{StaticResource Label}" />
+                                </CheckBox>
+                            </Border>
+                            <StackPanel x:Name="ProfileActions">
+                                <Border Style="{StaticResource Row}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="SetDefaultOutput" Style="{StaticResource ToggleSwitch}" Click="Profile_Changed">
+                                            <TextBlock Text="Make it the default audio output" Style="{StaticResource Label}" />
+                                        </CheckBox>
+                                        <CheckBox x:Name="SetDefaultComms" Style="{StaticResource ToggleSwitch}" Margin="0,10,0,0" Click="Profile_Changed">
+                                            <TextBlock Text="Also use it for calls (communications device)" Style="{StaticResource Label}" />
+                                        </CheckBox>
+                                        <CheckBox x:Name="RestorePrevious" Style="{StaticResource ToggleSwitch}" Margin="0,10,0,0" Click="Profile_Changed">
+                                            <TextBlock Text="Switch back to the previous output when it disconnects" Style="{StaticResource Label}" />
+                                        </CheckBox>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Row}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="VolumeEnabled" Style="{StaticResource ToggleSwitch}" Click="Profile_Changed">
+                                            <TextBlock Text="Set volume" Style="{StaticResource Label}" />
+                                        </CheckBox>
+                                        <Grid Margin="0,10,0,0">
+                                            <TextBlock x:Name="VolumeText" Style="{StaticResource Caption}" VerticalAlignment="Center" Width="40" HorizontalAlignment="Left" />
+                                            <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100" Margin="46,0,0,0" ValueChanged="Volume_Changed" />
+                                        </Grid>
+                                        <CheckBox x:Name="UseFaderly" Style="{StaticResource ToggleSwitch}" Margin="0,10,0,0" Click="Profile_Changed">
+                                            <StackPanel>
+                                                <TextBlock Text="Hand the volume to Faderly" Style="{StaticResource Label}" />
+                                                <TextBlock Text="Off: Tether sets this device's Windows volume directly." Style="{StaticResource Hint}" />
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Row}">
+                                    <StackPanel>
+                                        <TextBlock Text="Tonely EQ preset" Style="{StaticResource Label}" />
+                                        <TextBlock Text="Leave empty to keep Tonely's current preset." Style="{StaticResource Hint}" Margin="0,2,0,8" />
+                                        <TextBox x:Name="TonelyPresetBox" TextChanged="Profile_Changed" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <Button x:Name="RunProfileButton" Style="{StaticResource AccentButton}" Content="Run profile now" Click="RunProfile_Click" />
+                                <TextBlock Text="Available while the device is connected." Style="{StaticResource Caption}" Margin="12,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+
+            <!-- ============================== Integrations -->
+            <ScrollViewer x:Name="PageIntegrations" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock Text="Integrations" Style="{StaticResource PageTitle}" />
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,-8,0,14"
+                               Text="Profiles can drive Tonely (EQ presets) and Faderly (volume). Leave the path empty and Tether looks in the usual install folders, then falls back to the app's tonely:// or faderly:// link." />
+
+                    <TextBlock Text="Tonely" Style="{StaticResource SectionHeader}" Margin="2,0,0,6" />
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel>
+                            <TextBlock x:Name="TonelyStatus" Style="{StaticResource Caption}" Margin="0,0,0,10" />
+                            <TextBlock Text="Location" Style="{StaticResource Caption}" Margin="0,0,0,4" />
+                            <Grid>
+                                <TextBox x:Name="TonelyPath" Margin="0,0,92,0" TextChanged="Integration_Changed" />
+                                <Button Style="{StaticResource SecondaryButton}" Content="Browse…" HorizontalAlignment="Right" Width="84" Tag="Tonely" Click="Browse_Click" />
+                            </Grid>
+                            <TextBlock Text="Arguments ({value} = preset name)" Style="{StaticResource Caption}" Margin="0,10,0,4" />
+                            <TextBox x:Name="TonelyArgs" TextChanged="Integration_Changed" />
+                            <Grid Margin="0,10,0,0">
+                                <TextBox x:Name="TonelyTestValue" Text="Flat" Width="160" HorizontalAlignment="Left" />
+                                <Button Style="{StaticResource SecondaryButton}" Content="Send test preset" Margin="170,0,0,0" HorizontalAlignment="Left" Tag="Tonely" Click="TestIntegration_Click" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Faderly" Style="{StaticResource SectionHeader}" Margin="2,10,0,6" />
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel>
+                            <TextBlock x:Name="FaderlyStatus" Style="{StaticResource Caption}" Margin="0,0,0,10" />
+                            <TextBlock Text="Location" Style="{StaticResource Caption}" Margin="0,0,0,4" />
+                            <Grid>
+                                <TextBox x:Name="FaderlyPath" Margin="0,0,92,0" TextChanged="Integration_Changed" />
+                                <Button Style="{StaticResource SecondaryButton}" Content="Browse…" HorizontalAlignment="Right" Width="84" Tag="Faderly" Click="Browse_Click" />
+                            </Grid>
+                            <TextBlock Text="Arguments ({value} = volume 0–100)" Style="{StaticResource Caption}" Margin="0,10,0,4" />
+                            <TextBox x:Name="FaderlyArgs" TextChanged="Integration_Changed" />
+                            <Grid Margin="0,10,0,0">
+                                <TextBox x:Name="FaderlyTestValue" Text="40" Width="160" HorizontalAlignment="Left" />
+                                <Button Style="{StaticResource SecondaryButton}" Content="Send test volume" Margin="170,0,0,0" HorizontalAlignment="Left" Tag="Faderly" Click="TestIntegration_Click" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============================== Updates -->
+            <ScrollViewer x:Name="PageUpdates" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock Text="Updates" Style="{StaticResource PageTitle}" />
+                    <Border Style="{StaticResource Row}">
+                        <Grid>
+                            <StackPanel Margin="0,0,170,0">
+                                <TextBlock x:Name="CurrentVersionText" Style="{StaticResource Title}" />
+                                <TextBlock x:Name="UpdateStatusText" Style="{StaticResource Hint}" />
+                                <ProgressBar x:Name="UpdateProgressBar" Style="{StaticResource BatteryBar}" Foreground="{DynamicResource Accent}"
+                                             Maximum="1" Margin="0,10,0,0" Visibility="Collapsed" />
+                            </StackPanel>
+                            <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button x:Name="InstallUpdateButton" Style="{StaticResource AccentButton}" Content="Install and restart"
+                                        Click="InstallUpdate_Click" Visibility="Collapsed" Margin="0,0,0,6" />
+                                <Button x:Name="CheckNowButton" Style="{StaticResource SecondaryButton}" Content="Check now" Click="CheckNow_Click" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource Row}">
+                        <CheckBox x:Name="AutoCheckUpdates" Style="{StaticResource ToggleSwitch}" Click="Toggle_Click">
+                            <StackPanel>
+                                <TextBlock Text="Check for updates automatically" Style="{StaticResource Label}" />
+                                <TextBlock Text="Tether checks GitHub every few hours and asks before installing anything." Style="{StaticResource Hint}" />
+                            </StackPanel>
+                        </CheckBox>
+                    </Border>
+                    <Border Style="{StaticResource Row}">
+                        <CheckBox x:Name="IncludePrereleases" Style="{StaticResource ToggleSwitch}" Click="Toggle_Click">
+                            <StackPanel>
+                                <TextBlock Text="Include pre-release builds" Style="{StaticResource Label}" />
+                                <TextBlock Text="Get new features early. They may be rough." Style="{StaticResource Hint}" />
+                            </StackPanel>
+                        </CheckBox>
+                    </Border>
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel>
+                            <TextBlock Text="Release notes" Style="{StaticResource Label}" Margin="0,0,0,6" />
+                            <TextBlock x:Name="ReleaseNotesText" Style="{StaticResource Hint}" Text="Check for updates to see what's new." />
+                            <Button Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Padding="0,6" Click="OpenReleases_Click">
+                                <TextBlock Text="All releases on GitHub" Foreground="{DynamicResource Accent}" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============================== About -->
+            <ScrollViewer x:Name="PageAbout" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock Text="About" Style="{StaticResource PageTitle}" />
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/Assets/Tether.png" Width="56" Height="56" RenderOptions.BitmapScalingMode="HighQuality" />
+                            <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Tether" Style="{StaticResource Title}" FontSize="18" />
+                                <TextBlock x:Name="AboutVersion" Style="{StaticResource Caption}" />
+                                <TextBlock Text="Bluetooth devices, one click away." Style="{StaticResource Caption}" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Row}">
+                        <StackPanel>
+                            <Button Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Padding="0,4" Click="OpenRepo_Click">
+                                <TextBlock Text="github.com/larosa023/Tether" Foreground="{DynamicResource Accent}" />
+                            </Button>
+                            <Button Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Padding="0,4" Click="OpenLogs_Click">
+                                <TextBlock Text="Open log folder" Foreground="{DynamicResource Accent}" />
+                            </Button>
+                            <Button Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Padding="0,4" Click="OpenSettingsFolder_Click">
+                                <TextBlock Text="Open settings folder" Foreground="{DynamicResource Accent}" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

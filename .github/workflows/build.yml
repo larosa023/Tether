@@ -1,0 +1,68 @@
+name: Build & release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Work out version
+        id: ver
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $v = "${{ github.ref_name }}".TrimStart('v')
+          } else {
+            $v = "0.0.0-ci.${{ github.run_number }}"
+          }
+          $core = ($v -split '-')[0]
+          "version=$v" >> $env:GITHUB_OUTPUT
+          "core=$core" >> $env:GITHUB_OUTPUT
+          Write-Host "Building Tether $v"
+
+      - name: Publish single-file exe
+        run: >
+          dotnet publish src/Tether/Tether.csproj -c Release -r win-x64
+          -p:Version=${{ steps.ver.outputs.version }}
+          -p:AssemblyVersion=${{ steps.ver.outputs.core }}.0
+          -p:FileVersion=${{ steps.ver.outputs.core }}.0
+          -o publish
+
+      - name: Checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash publish/Tether.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  Tether.exe" | Out-File -Encoding ascii -NoNewline publish/Tether.exe.sha256
+          Get-Content publish/Tether.exe.sha256
+          "{0:N1} MB" -f ((Get-Item publish/Tether.exe).Length / 1MB)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Tether-${{ steps.ver.outputs.version }}
+          path: |
+            publish/Tether.exe
+            publish/Tether.exe.sha256
+
+      - name: Create GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            publish/Tether.exe
+            publish/Tether.exe.sha256
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}

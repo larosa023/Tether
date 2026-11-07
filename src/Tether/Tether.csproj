@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>Tether</AssemblyName>
+    <RootNamespace>Tether</RootNamespace>
+    <ApplicationIcon>Assets\Tether.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Version is stamped by CI from the git tag (v1.2.3 -> 1.2.3). -->
+    <Version>0.1.0</Version>
+    <Product>Tether</Product>
+    <Company>Anthony LaRosa</Company>
+    <Authors>Anthony LaRosa</Authors>
+    <Description>Lightweight Bluetooth device manager for the Windows tray.</Description>
+    <Copyright>© Anthony LaRosa</Copyright>
+    <RepositoryUrl>https://github.com/larosa023/Tether</RepositoryUrl>
+
+    <TieredPGO>true</TieredPGO>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <!-- dotnet publish -c Release -r win-x64 produces a single self-contained Tether.exe -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Tether.png" />
+    <EmbeddedResource Include="Assets\Tether.ico" LogicalName="Tether.ico" />
+  </ItemGroup>
+
+</Project>
