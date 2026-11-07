@@ -23,16 +23,29 @@ jobs:
       - name: Work out version
         id: ver
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          # Releases come from <Version> in Tether.csproj: when a push to main carries a version
+          # that has no release yet, this build becomes that release. Pushing a v* tag also works.
+          [xml]$proj = Get-Content src/Tether/Tether.csproj
+          $projVersion = ($proj.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
+          $release = "false"
           if ("${{ github.ref_type }}" -eq "tag") {
-            $v = "${{ github.ref_name }}".TrimStart('v')
+            $v = "${{ github.ref_name }}".TrimStart('v'); $release = "true"
+          } elseif ("${{ github.event_name }}" -eq "push" -and "${{ github.ref_name }}" -eq "main") {
+            gh release view "v$projVersion" --repo "${{ github.repository }}" 2>$null | Out-Null
+            if ($LASTEXITCODE -ne 0) { $v = $projVersion; $release = "true" }
+            else { $v = "$projVersion-ci.${{ github.run_number }}" }
           } else {
-            $v = "0.0.0-ci.${{ github.run_number }}"
+            $v = "$projVersion-ci.${{ github.run_number }}"
           }
+          $global:LASTEXITCODE = 0
           $core = ($v -split '-')[0]
           "version=$v" >> $env:GITHUB_OUTPUT
           "core=$core" >> $env:GITHUB_OUTPUT
-          Write-Host "Building Tether $v"
+          "release=$release" >> $env:GITHUB_OUTPUT
+          Write-Host "::notice title=Version::Building Tether $v (release: $release)"
 
       - name: Publish single-file exe
         run: >
@@ -63,7 +76,7 @@ jobs:
           Get-Content publish/Tether.exe.sha256
           "{0:N1} MB" -f ((Get-Item publish/Tether.exe).Length / 1MB)
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: Tether-${{ steps.ver.outputs.version }}
           path: |
@@ -71,11 +84,14 @@ jobs:
             publish/Tether.exe.sha256
 
       - name: Create GitHub release
-        if: github.ref_type == 'tag'
+        if: steps.ver.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: Tether ${{ steps.ver.outputs.version }}
+          target_commitish: ${{ github.sha }}
           files: |
             publish/Tether.exe
             publish/Tether.exe.sha256
           generate_release_notes: true
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(steps.ver.outputs.version, '-') }}

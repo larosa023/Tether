@@ -79,14 +79,13 @@ If Tether lives in a protected folder (Program Files), the swap is done by a UAC
 
 ## Releasing
 
-CI (`.github/workflows/build.yml`) builds on every push. To ship a version:
+CI (`.github/workflows/build.yml`) builds and smoke-tests every push on a Windows runner. To ship a version, bump `<Version>` in `src/Tether/Tether.csproj` and push to `main`:
 
-```bash
-git tag v0.2.0
-git push origin v0.2.0
+```xml
+<Version>0.2.0</Version>
 ```
 
-The workflow stamps the version from the tag, publishes the single-file exe, writes the checksum and creates the GitHub release with both files attached. Tags with a dash (e.g. `v0.3.0-beta.1`) are marked as pre-releases. Existing installs pick the release up automatically.
+If no `v0.2.0` release exists yet, that build becomes the release: CI tags the commit, publishes the single-file exe, writes `Tether.exe.sha256` and attaches both. A version with a dash (e.g. `0.3.0-beta.1`) is marked as a pre-release. Pushing a `v*` tag yourself works too. Existing installs pick the release up automatically.
 
 ## Building locally
 
