@@ -2,6 +2,7 @@
 
 <h1 align="center">Tether</h1>
 <p align="center">Bluetooth devices, one click away. A lightweight Windows tray app.</p>
+<p align="center"><a href="https://github.com/larosa023/Tether/releases/latest/download/Tether.exe"><b>Download Tether.exe</b></a></p>
 
 ---
 
