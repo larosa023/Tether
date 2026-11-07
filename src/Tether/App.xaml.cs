@@ -21,6 +21,14 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        int st = Array.IndexOf(e.Args, "--selftest");
+        if (st >= 0)
+        {
+            SelfTest.Run(this, st + 1 < e.Args.Length ? e.Args[st + 1] : "selftest.txt");
+            return;
+        }
+
         bool relaunch = e.Args.Contains("--updated") || e.Args.Contains("--elevated-restart");
 
         if (!AcquireSingleInstance(waitForPrevious: relaunch))

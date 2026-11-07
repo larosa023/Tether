@@ -42,6 +42,19 @@ jobs:
           -p:FileVersion=${{ steps.ver.outputs.core }}.0
           -o publish
 
+      - name: Smoke test (open every window)
+        shell: pwsh
+        run: |
+          $report = "$env:RUNNER_TEMP\selftest.txt"
+          $p = Start-Process publish/Tether.exe -ArgumentList "--selftest", "`"$report`"" -PassThru
+          if (-not $p.WaitForExit(120000)) { $p.Kill(); throw "Self-test timed out" }
+          $level = if ($p.ExitCode -eq 0) { "notice" } else { "error" }
+          if (Test-Path $report) {
+            $text = (Get-Content $report) -join '%0A'
+            Write-Host "::$level title=Self-test::$text"
+          } else { Write-Host "::$level title=Self-test::No report written (exit $($p.ExitCode))" }
+          if ($p.ExitCode -ne 0) { throw "Self-test failed with exit code $($p.ExitCode)" }
+
       - name: Checksum
         shell: pwsh
         run: |
